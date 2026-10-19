@@ -66,3 +66,23 @@ curl -X POST localhost:8000/api/optimizar -H "Content-Type: application/json" -d
 - La caché de PVGIS va a `data/raw/`; con la variable `AUTOSOLAR_CACHE_DIR` se cambia la carpeta
   (en Vercel, `/tmp`, porque el disco es de solo lectura).
 - Los tests de la API no usan red (PVGIS se mockea): `pytest tests/test_api.py`.
+
+## Frontend (Next.js)
+
+Next.js (App Router, TypeScript, Tailwind) + Recharts en la raíz, con el patrón del template
+`nextjs-fastapi` de Vercel: en desarrollo `next.config.ts` reescribe `/api/*` a uvicorn
+(`127.0.0.1:8000`); en producción Vercel enruta `/api/*` a `api/index.py`. No hay rutas en
+`app/api`.
+
+```bash
+npm install
+npm run dev        # Next (localhost:3000) + uvicorn (puerto 8000) con concurrently
+```
+
+`npm run dev` usa el `python` del PATH: activa antes el entorno con las dependencias de la API.
+
+| Carpeta | Qué tiene |
+| --- | --- |
+| `app/` | layout y página única (formulario + pestañas Resultados / Sensibilidad) |
+| `components/` | formulario por secciones, KPIs, comparación y `graficas/` (una por archivo) |
+| `lib/` | tipos de la API, campos del formulario, errores 422, formato es-CO y colores fijos |

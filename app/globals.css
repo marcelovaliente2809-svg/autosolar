@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Colores fijos de las series (iguales en todas las gráficas: lib/colores.ts) */
+  --color-autoconsumo: #2a6fdb;
+  --color-exc1: #e5a50a;
+  --color-exc2: #2e9d5a;
+  --color-importacion: #8b9099;
+  --color-fv: #f2711c;
+
+  /* Tamaños de batería en "VPN según la potencia FV" (más claros en modo oscuro) */
+  --color-bat-1: #6d3fd1;
+  --color-bat-2: #0e8a99;
+  --color-bat-3: #c2367a;
+
+  /* Neutros: grises cálidos. Se redefinen abajo para el modo oscuro. */
+  --color-tinta: #1f1d1a;
+  --color-tinta-2: #4f4a43;
+  --color-tinta-3: #7d766c;
+  --color-fondo: #f3f1ec;
+  --color-panel: #fbfaf8;
+  --color-campo: #ffffff;
+  --color-borde: #e1ddd5;
+  --color-grilla: #e9e6df;
+
+  /* Único acento: ámbar solar */
+  --color-acento: #c98a0b;
+  --color-acento-suave: #f7ecd3;
+  --color-sobre-acento: #1f1d1a;
+
+  /* Estados */
+  --color-error: #b42318;
+  --color-error-fondo: #fdecea;
+  --color-bien: #1d7a45;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --color-tinta: #ece8e1;
+      --color-tinta-2: #bfb8ad;
+      --color-tinta-3: #8f887d;
+      --color-fondo: #161513;
+      --color-panel: #1e1c1a;
+      --color-campo: #262421;
+      --color-borde: #36332f;
+      --color-grilla: #2d2a27;
+
+      --color-bat-1: #a98bf5;
+      --color-bat-2: #3fc1cf;
+      --color-bat-3: #ec6ea8;
+
+      --color-acento: #f0b33a;
+      --color-acento-suave: #3a2d12;
+      --color-sobre-acento: #1a1408;
+
+      --color-error: #f5877c;
+      --color-error-fondo: #3b1c19;
+      --color-bien: #6fcf97;
+    }
+  }
+
+  body {
+    background: var(--color-fondo);
+    color: var(--color-tinta);
+  }
+}
+
+/* Números: IBM Plex Mono con cifras tabulares (KPIs, tablas, ejes y tooltips) */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.recharts-cartesian-axis-tick-value,
+.recharts-label,
+.recharts-label-list {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* <details> sin el triángulo nativo */
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  list-style: none;
+}

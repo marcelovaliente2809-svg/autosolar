@@ -13,3 +13,4 @@ node_modules/
 .next/
 .vercel/
 .pytest_tmp/
+*.tsbuildinfo
