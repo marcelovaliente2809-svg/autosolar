@@ -93,3 +93,10 @@ summary::-webkit-details-marker {
 summary {
   list-style: none;
 }
+
+/* Opciones de <select>: Windows dibuja la lista nativa con fondo claro aunque la página esté en
+   modo oscuro, y el texto heredado (claro) queda ilegible. Se fijan fondo y texto explícitos. */
+select option {
+  background-color: var(--color-campo);
+  color: var(--color-tinta);
+}
