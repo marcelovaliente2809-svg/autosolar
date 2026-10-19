@@ -18,6 +18,9 @@ Contrato:
         incentivos_ley1715; si no, en finanzas.anios_depreciacion_normal (ET art. 137).
         Deducción especial (finanzas.incentivos_ley1715 y declara_renta): 50 % del CAPEX,
         cada año ≤ 50 % de renta_liquida_anual_cop, máximo 15 años, lo más rápido posible.
+    vpn_flujo(kwp, kwh_bat, ahorro_anio1, gen_kwh_anio1, ciclos_anio1, cfg) -> float
+        El vpn de kpis(flujo_caja(...)) sin armar el DataFrame ni calcular TIR/LCOE (la
+        optimización y la sensibilidad lo usan para comparar muchas combinaciones).
     kpis(flujo, cfg) -> dict
         vpn (COP), tir (fracción; nan si no existe), payback_simple y payback_descontado
         (años, interpolado; nan si no se recupera), lcoe (COP/kWh, antes de impuestos).
@@ -61,15 +64,15 @@ def _deducciones(capex: float, cfg: Config) -> np.ndarray:
     return ded
 
 
-def flujo_caja(
+def _flujo(
     kwp: float,
     kwh_bat: float,
     ahorro_anio1: float,
     gen_kwh_anio1: float,
     ciclos_anio1: float,
     cfg: Config,
-) -> pd.DataFrame:
-    """Flujo de caja del proyecto, años 0..N (COP). Ver contrato del módulo."""
+) -> dict[str, np.ndarray]:
+    """Columnas de flujo_caja como arrays (sin DataFrame: la optimización lo llama a miles)."""
     n = cfg.finanzas.horizonte_anios
     fin = cfg.finanzas
     t = np.arange(n + 1)
@@ -108,22 +111,47 @@ def flujo_caja(
     capex_col[0] = capex
     flujo = ahorro - opex - impuestos + escudo - reposicion - capex_col
 
-    return pd.DataFrame(
-        {
-            "capex": capex_col,
-            "ahorro": ahorro,
-            "opex": opex,
-            "reposicion": reposicion,
-            "depreciacion": depreciacion,
-            "deduccion": deduccion,
-            "impuestos": impuestos,
-            "escudo_fiscal": escudo,
-            "gen_kwh": gen,
-            "flujo": flujo,
-            "flujo_acumulado": np.cumsum(flujo),
-        },
-        index=pd.Index(t, name="anio"),
-    )
+    return {
+        "capex": capex_col,
+        "ahorro": ahorro,
+        "opex": opex,
+        "reposicion": reposicion,
+        "depreciacion": depreciacion,
+        "deduccion": deduccion,
+        "impuestos": impuestos,
+        "escudo_fiscal": escudo,
+        "gen_kwh": gen,
+        "flujo": flujo,
+        "flujo_acumulado": np.cumsum(flujo),
+    }
+
+
+def flujo_caja(
+    kwp: float,
+    kwh_bat: float,
+    ahorro_anio1: float,
+    gen_kwh_anio1: float,
+    ciclos_anio1: float,
+    cfg: Config,
+) -> pd.DataFrame:
+    """Flujo de caja del proyecto, años 0..N (COP). Ver contrato del módulo."""
+    columnas = _flujo(kwp, kwh_bat, ahorro_anio1, gen_kwh_anio1, ciclos_anio1, cfg)
+    anios = pd.Index(np.arange(cfg.finanzas.horizonte_anios + 1), name="anio")
+    return pd.DataFrame(columnas, index=anios)
+
+
+def vpn_flujo(
+    kwp: float,
+    kwh_bat: float,
+    ahorro_anio1: float,
+    gen_kwh_anio1: float,
+    ciclos_anio1: float,
+    cfg: Config,
+) -> float:
+    """VPN [COP] del flujo de caja: igual a kpis(flujo_caja(...), cfg)["vpn"], pero rápido."""
+    fc = _flujo(kwp, kwh_bat, ahorro_anio1, gen_kwh_anio1, ciclos_anio1, cfg)["flujo"]
+    factor = (1 + cfg.finanzas.tasa_descuento) ** -np.arange(len(fc), dtype=float)
+    return float((fc * factor).sum())
 
 
 def _payback(flujos: np.ndarray) -> float:

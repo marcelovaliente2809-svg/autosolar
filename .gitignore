@@ -9,3 +9,7 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 .claude/settings.local.json
+node_modules/
+.next/
+.vercel/
+.pytest_tmp/

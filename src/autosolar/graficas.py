@@ -34,11 +34,11 @@ from __future__ import annotations
 
 import math
 
-import holidays
 import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter
 
+from autosolar.balance import dias_tipicos as _dias_tipicos
 from autosolar.config import LIMITE_AGPE_MENOR_KWP, Config
 from autosolar.finanzas import kpis
 from autosolar.liquidacion import valor_credito_cop_kwh
@@ -97,50 +97,6 @@ def _limpiar(ax, eje_valor: str = "y") -> None:
         ax.spines[lado].set_visible(False)
     ax.grid(axis=eje_valor, color="#DDDDDD", linewidth=0.6)
     ax.set_axisbelow(True)
-
-
-MES_DIA_TIPICO = 7  # julio
-
-
-def _elegir_dia(dias: list[pd.Timestamp], criterios, ref: pd.Timestamp) -> pd.Timestamp:
-    """Día más cercano a `ref` que cumple el primer criterio con candidatos.
-
-    criterios: funciones día → bool de la más a la menos exigente; si ninguna tiene
-    candidatos (datos cortos de prueba) cae al primer día disponible.
-    """
-    for criterio in criterios:
-        candidatos = [d for d in dias if criterio(d)]
-        if candidatos:
-            return min(candidatos, key=lambda d: abs(d - ref))
-    return dias[0]
-
-
-def _dias_tipicos(balance: pd.DataFrame) -> tuple[pd.Timestamp, pd.Timestamp]:
-    """Miércoles no festivo de julio y domingo de julio más cercano a ese miércoles."""
-    dias = list(pd.DatetimeIndex(balance.index.normalize().unique()))
-    festivos = holidays.Colombia(years=sorted({d.year for d in dias}))
-    laboral = lambda d: d.weekday() < 5 and d not in festivos
-    julio = lambda d: d.month == MES_DIA_TIPICO
-    ref = pd.Timestamp(year=dias[len(dias) // 2].year, month=MES_DIA_TIPICO, day=15)
-
-    habil = _elegir_dia(
-        dias,
-        (
-            lambda d: julio(d) and d.weekday() == 2 and d not in festivos,
-            lambda d: julio(d) and laboral(d),
-            laboral,
-        ),
-        ref,
-    )
-    finde = _elegir_dia(
-        dias,
-        (
-            lambda d: d.month == habil.month and d.weekday() == 6,
-            lambda d: d.weekday() >= 5,
-        ),
-        habil,
-    )
-    return habil, finde
 
 
 def _tramo_dia(balance: pd.DataFrame, dia: pd.Timestamp) -> pd.DataFrame:
