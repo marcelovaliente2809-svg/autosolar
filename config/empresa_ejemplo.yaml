@@ -1,0 +1,61 @@
+# Configuración de una empresa para evaluar autogeneración solar + baterías.
+# Copia este archivo (p. ej. config/mi_empresa.yaml) y cambia los valores.
+# Todos los valores marcados como EJEMPLO son de relleno: reemplázalos con datos reales
+# (factura del cliente, tarifa vigente del operador de red, cotizaciones).
+
+empresa:
+  nombre: "Planta ejemplo 1 turno"
+  declara_renta: true              # habilita los incentivos de la Ley 1715 en el flujo de caja
+
+ubicacion:
+  latitud: 6.2442                  # Medellín
+  longitud: -75.5812
+  area_techo_m2: 2000              # limita los kWp instalables
+
+consumo:
+  modo: "sintetico"                # "sintetico" o "archivo"
+  archivo: null                    # CSV horario (8760 filas, kWh) si modo = "archivo"
+  consumo_mensual_kwh: 50000       # EJEMPLO, sale de la factura
+  jornada: "1_turno"               # "1_turno", "2_turnos", "continua"
+
+tarifa:
+  operador_red: "EPM"
+  nivel_tension: 2
+  cu_cop_kwh: 900.0                # EJEMPLO: costo unitario CU vigente (tarifa EPM)
+  componente_comercializacion_cop_kwh: 80.0   # EJEMPLO: componente C del CU
+  g_cop_kwh: 330.0                 # EJEMPLO: componente G (generación) del CU
+  escalamiento_anual: 0.04         # EJEMPLO: crecimiento real/nominal de la tarifa
+  valoracion_exc2: "precio_bolsa"  # "precio_bolsa" o "mc" (escenario CREG 101 072/087 de 2025)
+  precio_exc2_cop_kwh: 350.0       # EJEMPLO: promedio de bolsa o Mc según el escenario
+  precio_mc_cop_kwh: 300.0         # EJEMPLO: Mc, valoración de Exc2 en el escenario "mc"
+
+sistema_fv:
+  capex_cop_wp: 3200.0             # EJEMPLO: cotización instalada
+  opex_pct_capex: 0.01             # O&M anual como fracción del CAPEX
+  degradacion_anual: 0.005
+  perdidas_sistema: 0.14           # pérdidas tipo PVWatts
+  kwp_min: 0
+  kwp_max: 1000                    # límite AGPE = 1 MW (Res. UPME 281 de 2015)
+  paso_kwp: 25
+  m2_por_kwp: 5.5                  # EJEMPLO: m² de techo por kWp (paneles + pasillos)
+
+bateria:
+  capex_cop_kwh: 1800000.0         # EJEMPLO
+  eficiencia_ciclo: 0.90
+  dod: 0.90                        # profundidad de descarga utilizable
+  c_rate: 0.5                      # potencia máx = c_rate * capacidad
+  vida_ciclos: 6000
+  vida_calendario_anios: 12        # la batería se repone al cumplirse vida_ciclos o estos años
+  kwh_min: 0
+  kwh_max: 2000
+  paso_kwh: 100
+
+finanzas:
+  horizonte_anios: 25
+  tasa_descuento: 0.12             # EJEMPLO: WACC o tasa de oportunidad de la empresa
+  tasa_renta: 0.35
+  inflacion: 0.04
+  renta_liquida_anual_cop: 2000000000   # EJEMPLO: renta líquida anual antes de restar la inversión
+  anios_depreciacion: 3            # Ley 2099/Decreto 895: tasa ≤ 33,33 % → mínimo 3 años
+  anios_depreciacion_normal: 10    # si incentivos_ley1715 = false: maquinaria y equipo, ET art. 137
+  incentivos_ley1715: true        # deducción 50 % del CAPEX (requiere declara_renta)
