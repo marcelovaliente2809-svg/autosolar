@@ -95,7 +95,34 @@ def test_optimizar_estructura_y_series(cliente):
     assert s["balance_mensual"]["mes"] == list(range(1, 13))
     assert len(s["balance_mensual"]["generacion_kwh"]) == 12
     assert len(s["flujo_acumulado"]["base"]) == len(s["flujo_acumulado"]["anio"]) == 13
-    assert set(s["lcoe_vs_valores"]) == {"lcoe", "cu", "cu_menos_cv", "g", "precio_exc2"}
+    assert set(s["lcoe_vs_valores"]) == {
+        "lcoe", "cu", "cu_menos_cv", "g", "precio_exc2", "valor_kwh_marginal"
+    }
+
+
+def test_valor_kwh_marginal_frente_al_paso_anterior(cliente):
+    d = cliente.post("/api/optimizar", json=_cfg_dict()).json()
+    mejor, cfg = d["mejor"], _cfg()
+    previa = max(
+        (f for f in d["tabla"] if f["kwh_bat"] == mejor["kwh_bat"] and f["kwp"] < mejor["kwp"]),
+        key=lambda f: f["kwp"],
+    )
+    assert previa["kwp"] == mejor["kwp"] - cfg.sistema_fv.paso_kwp
+
+    def auto(f):
+        return f["autoconsumo_pct"] * f["gen_kwh"]
+
+    s = (auto(mejor) - auto(previa)) / (mejor["gen_kwh"] - previa["gen_kwh"])
+    credito = liquidacion.valor_credito_cop_kwh(cfg.tarifa, mejor["kwp"])
+    esperado = s * cfg.tarifa.cu_cop_kwh + (1 - s) * credito
+    assert 0 <= s <= 1
+    assert d["series"]["lcoe_vs_valores"]["valor_kwh_marginal"] == pytest.approx(esperado)
+
+
+def test_valor_kwh_marginal_es_null_sin_paso_anterior(cliente):
+    cfg = _cfg_dict(**{"sistema_fv.kwp_min": 100, "sistema_fv.kwp_max": 100})
+    d = cliente.post("/api/optimizar", json=cfg).json()
+    assert d["series"]["lcoe_vs_valores"]["valor_kwh_marginal"] is None
 
 
 def test_optimizar_series_son_las_de_la_mejor(cliente):

@@ -56,6 +56,8 @@ export interface Series {
     cu_menos_cv: number;
     g: number;
     precio_exc2: number;
+    // solo /api/optimizar: s·CU + (1 − s)·crédito Exc1 del último paso de kWp (null sin paso previo)
+    valor_kwh_marginal?: number | null;
   };
 }
 

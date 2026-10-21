@@ -316,18 +316,21 @@ function BreakevenBateria({ datos }: { datos: ResultadoSensibilidad }) {
           </div>
         </div>
       )}
-      <dl className="mt-4 grid max-w-xl gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-xs text-tinta-3">capex_cop_kwh actual</dt>
-          <dd className="num font-semibold">{cop(actual)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-tinta-3">Umbral de breakeven</dt>
-          <dd className="num font-semibold">
-            {estado === "umbral" && umbral != null ? cop(umbral) : estado === "siempre" ? `> ${cop(actual * VECES_MAX)}` : `< ${cop(actual / VECES_MIN)}`}
-          </dd>
-        </div>
-      </dl>
+      {/* sin umbral no hay barra de marcas: los dos valores van en texto */}
+      {!marcas && (
+        <dl className="mt-4 grid max-w-xl gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-xs text-tinta-3">Umbral</dt>
+            <dd className="num font-semibold">
+              {estado === "siempre" ? `> ${cop(actual * VECES_MAX)}` : `< ${cop(actual / VECES_MIN)}`}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-tinta-3">CAPEX actual</dt>
+            <dd className="num font-semibold">{cop(actual)}</dd>
+          </div>
+        </dl>
+      )}
     </section>
   );
 }

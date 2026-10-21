@@ -68,7 +68,8 @@ Se repiten los pasos 3 a 5 para todas las combinaciones de la grilla, respetando
 
 ## Cómo leer el resultado
 
-- **LCOE frente a G.** Si producir un kWh solar (LCOE) cuesta menos que lo que reconocen por exportarlo (G), cada kWp adicional es rentable aunque se exporte, y el óptimo llena el techo. Si cuesta más, aparece un tamaño óptimo menor que el techo.
+- **El kWp marginal.** Agregar un kWp más conviene mientras la energía que produce valga más de lo que cuesta producirla (LCOE). Esa energía es una mezcla: una parte *s* todavía se autoconsume y vale el CU, y el resto se exporta y vale G (en sistemas > 100 kW). El sistema crece mientras *s* × CU + (1 − *s*) × G > LCOE, es decir, mientras la fracción autoconsumida del kWp adicional supere (LCOE − G) ÷ (CU − G). A medida que el sistema crece, *s* baja, porque el consumo diurno ya está cubierto. Si el techo se acaba antes de llegar a ese punto, el óptimo llena el techo; si no, aparece un tamaño óptimo menor.
+- **Los impuestos también cuentan.** El LCOE que muestra la herramienta es antes de impuestos. Con la Ley 1715, la deducción especial y la depreciación acelerada devuelven en valor presente cerca del 40 % de la inversión, así que el costo efectivo por kWh es menor que el LCOE mostrado.
 - **El techo de la batería.** Como el sol sale una vez al día, una batería hace como máximo un ciclo diario. Lo máximo que puede devolver cada kWh instalado es ≈ 365 × DoD × (CU × η − G) al año, traído a valor presente durante su vida. Si su precio supera ese valor, no se recomienda, sin importar la jornada.
 
 ## Validaciones

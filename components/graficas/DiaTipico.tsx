@@ -76,6 +76,8 @@ function Panel({
             <Area dataKey="descarga_bat" stackId="c" type="linear" fill={COLOR.autoconsumoBat} fillOpacity={0.9} stroke="none" isAnimationActive={false} />
           )}
           <Area dataKey="importado" stackId="c" type="linear" fill={COLOR.importacion} fillOpacity={0.55} stroke="none" isAnimationActive={false} />
+          {/* Encima de la carga: lo que sale a la red (generación − autoconsumo − carga de batería) */}
+          <Area dataKey="exportado" stackId="c" type="linear" fill={COLOR.exc2} fillOpacity={0.45} stroke="none" isAnimationActive={false} />
           <Line dataKey="generacion" type="linear" stroke={COLOR.fv} strokeWidth={2} dot={false} isAnimationActive={false} />
           <Tooltip
             cursor={{ stroke: COLOR.eje, strokeDasharray: "3 3" }}
@@ -97,7 +99,7 @@ function Panel({
                         ]
                       : []),
                     { etiqueta: "Importación", valor: num(p.importado, 1), color: COLOR.importacion },
-                    { etiqueta: "Exportado", valor: num(p.exportado, 1) },
+                    { etiqueta: "Exportación", valor: num(p.exportado, 1), color: COLOR.exc2 },
                   ]}
                 />
               );
@@ -127,12 +129,13 @@ export default function DiaTipico({ habil, domingo }: { habil: Dia; domingo: Dia
             { etiqueta: "Autoconsumo", color: COLOR.autoconsumo },
             ...(conBateria ? [{ etiqueta: "Autoconsumo vía batería", color: COLOR.autoconsumoBat }] : []),
             { etiqueta: "Importación", color: COLOR.importacion },
+            { etiqueta: "Exportación", color: COLOR.exc2 },
           ]}
         />
       }
       comoLeerla={[
         "El área apilada es la carga de la planta, separada en lo que cubre el sol (azul) y lo que se compra a la red (gris); la línea naranja es la generación FV.",
-        "Donde la línea naranja sobrepasa el área, sobra energía: se carga la batería o se exporta. Compare el miércoles hábil con el domingo, cuando la planta consume poco y casi todo se exporta.",
+        "Sobre la carga, el área verde es lo que se exporta a la red; si la línea naranja queda por encima del verde, esa diferencia está cargando la batería. Compare el miércoles hábil con el domingo, cuando la planta consume poco y casi todo se exporta.",
       ]}
     >
       <div className="grid gap-4 md:grid-cols-2">

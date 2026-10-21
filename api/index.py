@@ -3,6 +3,7 @@
 Sólo adapta HTTP ↔ motor: la lógica vive en src/autosolar. Rutas:
     GET  /api/config-ejemplo   config/empresa_ejemplo.yaml como JSON
     POST /api/optimizar        body: Config → mejores soluciones, tabla y series de la mejor
+                               (sus lcoe_vs_valores traen además valor_kwh_marginal)
     POST /api/evaluar          body: {config, kwp, kwh_bat} → una combinación y sus series
     POST /api/sensibilidad     body: Config → tornado, escenarios y breakeven de la batería
 
@@ -29,6 +30,7 @@ from autosolar import optimizacion, sensibilidad
 from autosolar.carga import perfil_carga
 from autosolar.config import LIMITE_AGPE_KWP, Config, cargar_config
 from autosolar.finanzas import kpis
+from autosolar.liquidacion import valor_credito_cop_kwh
 from autosolar.solar import generacion_por_kwp
 
 CONFIG_EJEMPLO = RAIZ / "config" / "empresa_ejemplo.yaml"
@@ -113,6 +115,26 @@ def _series(cfg: Config, kwp: float, kwh_bat: float, g: pd.Series, c: pd.Series)
     }
 
 
+def _valor_kwh_marginal(cfg: Config, tabla: pd.DataFrame, mejor: pd.Series) -> float:
+    """COP/kWh del último paso de kWp: frente a la combinación anterior de la grilla (mismo
+    kwh_bat, kwp un paso menor), s = Δautoconsumo / Δgeneración y
+    valor = s·CU + (1 − s)·crédito de Exc1. NaN si no hay paso anterior o no cambia la generación.
+    """
+    misma_bat = tabla[(tabla["kwh_bat"] == mejor["kwh_bat"]) & (tabla["kwp"] < mejor["kwp"])]
+    if misma_bat.empty:
+        return math.nan
+    previa = misma_bat.loc[misma_bat["kwp"].idxmax()]
+    d_gen = mejor["gen_kwh"] - previa["gen_kwh"]
+    if d_gen <= 0:
+        return math.nan
+    d_auto = (
+        mejor["autoconsumo_pct"] * mejor["gen_kwh"] - previa["autoconsumo_pct"] * previa["gen_kwh"]
+    )
+    s = d_auto / d_gen
+    credito = valor_credito_cop_kwh(cfg.tarifa, float(mejor["kwp"]))
+    return s * cfg.tarifa.cu_cop_kwh + (1 - s) * credito
+
+
 @app.get("/api/config-ejemplo")
 def config_ejemplo():
     return _json(cargar_config(CONFIG_EJEMPLO).model_dump(mode="json"))
@@ -130,13 +152,15 @@ def optimizar(cfg: Config):
         return None if sub.empty else sub.iloc[0].to_dict()
 
     mejor = tabla.iloc[0]
+    series = _series(cfg, float(mejor["kwp"]), float(mejor["kwh_bat"]), g, c)
+    series["lcoe_vs_valores"]["valor_kwh_marginal"] = _valor_kwh_marginal(cfg, tabla, mejor)
     return _json(
         {
             "mejor": mejor.to_dict(),
             "mejor_sin_bateria": primera(tabla["kwh_bat"] == 0),
             "mejor_con_bateria": primera(tabla["kwh_bat"] > 0),
             "tabla": tabla,
-            "series": _series(cfg, float(mejor["kwp"]), float(mejor["kwh_bat"]), g, c),
+            "series": series,
         }
     )
 
