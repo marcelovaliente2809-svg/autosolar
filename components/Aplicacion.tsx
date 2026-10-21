@@ -22,11 +22,12 @@ import {
 import type { Tips } from "@/lib/glosario";
 import type { Config, ResultadoOptimizar, ResultadoSensibilidad } from "@/lib/tipos";
 
-type Pestana = "resultados" | "sensibilidad" | "glosario";
+type Pestana = "resultados" | "sensibilidad" | "metodologia" | "glosario";
 
 const PESTANAS: { id: Pestana; titulo: string }[] = [
   { id: "resultados", titulo: "Resultados" },
   { id: "sensibilidad", titulo: "Sensibilidad" },
+  { id: "metodologia", titulo: "Metodología" },
   { id: "glosario", titulo: "Glosario" },
 ];
 
@@ -60,7 +61,15 @@ function techoKwp(cfg: Config): number {
   return Math.min(fv.kwp_max, area / fv.m2_por_kwp);
 }
 
-export default function Aplicacion({ tips, glosario }: { tips: Tips; glosario: ReactNode }) {
+export default function Aplicacion({
+  tips,
+  glosario,
+  metodologia,
+}: {
+  tips: Tips;
+  glosario: ReactNode;
+  metodologia: ReactNode;
+}) {
   const [base, setBase] = useState<Config | null>(null);
   const [valores, setValores] = useState<Valores>({});
   const [errores, setErrores] = useState<Errores>(SIN_ERRORES);
@@ -191,7 +200,12 @@ export default function Aplicacion({ tips, glosario }: { tips: Tips; glosario: R
               Dimensionamiento y evaluación de autogeneración solar con baterías para industria en Colombia
             </p>
           </div>
-          <Estado cargada={base != null} error={errorCarga != null} ejemplo={esEjemplo} />
+          <Estado
+            cargada={base != null}
+            error={errorCarga != null}
+            ejemplo={esEjemplo}
+            onFuentes={() => setPestana("metodologia")}
+          />
         </header>
 
         <div className="lg:flex lg:min-h-0 lg:flex-1">
@@ -259,6 +273,8 @@ export default function Aplicacion({ tips, glosario }: { tips: Tips; glosario: R
             <div className="mx-auto max-w-[1280px] space-y-4 p-3 sm:p-5">
               {pestana === "glosario" ? (
                 glosario
+              ) : pestana === "metodologia" ? (
+                metodologia
               ) : pestana === "sensibilidad" ? (
                 <PanelSensibilidad
                   listo={base != null}
@@ -287,14 +303,40 @@ export default function Aplicacion({ tips, glosario }: { tips: Tips; glosario: R
   );
 }
 
-function Estado({ cargada, error, ejemplo }: { cargada: boolean; error: boolean; ejemplo: boolean }) {
+function Estado({
+  cargada,
+  error,
+  ejemplo,
+  onFuentes,
+}: {
+  cargada: boolean;
+  error: boolean;
+  ejemplo: boolean;
+  onFuentes: () => void;
+}) {
+  if (cargada && !error && ejemplo) {
+    // los valores de ejemplo tienen fuente: el indicador lleva a la pestaña que las cita
+    return (
+      <p role="status" className="text-xs">
+        <button
+          type="button"
+          onClick={onFuentes}
+          className="flex items-center gap-1.5 rounded-full border border-borde px-2.5 py-0.5 hover:border-acento/60 focus-visible:ring-2 focus-visible:ring-acento/40 focus-visible:outline-none"
+        >
+          <span className="size-1.5 rounded-full bg-tinta-3" aria-hidden />
+          <span className="font-medium text-tinta">Datos de ejemplo</span>
+          <span className="text-tinta-3">
+            · fuentes en <span className="text-acento underline underline-offset-2">Metodología</span>
+          </span>
+        </button>
+      </p>
+    );
+  }
   const [texto, detalle, punto] = error
     ? ["Sin conexión", "la API no respondió", "bg-error"]
     : !cargada
       ? ["Cargando…", "", "bg-tinta-3"]
-      : ejemplo
-        ? ["Datos de ejemplo", "config de la API sin cambios", "bg-tinta-3"]
-        : ["Datos propios", "editados en el panel", "bg-acento"];
+      : ["Datos propios", "editados en el panel", "bg-acento"];
   return (
     <p className="flex items-center gap-1.5 rounded-full border border-borde px-2.5 py-0.5 text-xs" role="status">
       <span className={`size-1.5 rounded-full ${punto}`} aria-hidden />

@@ -4,8 +4,16 @@ import Aplicacion from "@/components/Aplicacion";
 import Glosario from "@/components/Glosario";
 import { extraerTips } from "@/lib/glosario";
 
-// Componente de servidor: content/glosario.md se lee en build time (la página es estática).
+const leer = (archivo: string) => readFile(path.join(process.cwd(), "content", archivo), "utf-8");
+
+// Componente de servidor: los .md de content/ se leen en build time (la página es estática).
 export default async function Pagina() {
-  const markdown = await readFile(path.join(process.cwd(), "content", "glosario.md"), "utf-8");
-  return <Aplicacion tips={extraerTips(markdown)} glosario={<Glosario markdown={markdown} />} />;
+  const [glosario, metodologia] = await Promise.all([leer("glosario.md"), leer("metodologia.md")]);
+  return (
+    <Aplicacion
+      tips={extraerTips(glosario)}
+      glosario={<Glosario markdown={glosario} />}
+      metodologia={<Glosario markdown={metodologia} />}
+    />
+  );
 }

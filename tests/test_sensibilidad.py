@@ -34,13 +34,15 @@ def _cfg():
     cfg.ubicacion.area_techo_m2 = 100  # 100 / 5.5 = 18 kWp
     cfg.bateria.kwh_min, cfg.bateria.kwh_max, cfg.bateria.paso_kwh = 0, 10, 5
     cfg.bateria.eficiencia_ciclo, cfg.bateria.dod, cfg.bateria.c_rate = 1.0, 1.0, 1.0
+    cfg.sistema_fv.capex_cop_wp = 3200.0
+    cfg.bateria.capex_cop_kwh = 1_800_000.0
     # El "año" de 24 h ahorra poco: tarifas ×1000 para que los flujos sean positivos
     t = cfg.tarifa
-    t.cu_cop_kwh *= 1000
-    t.g_cop_kwh *= 1000
-    t.componente_comercializacion_cop_kwh *= 1000
-    t.precio_exc2_cop_kwh *= 1000
-    t.precio_mc_cop_kwh *= 1000
+    t.cu_cop_kwh = 900.0 * 1000
+    t.g_cop_kwh = 330.0 * 1000
+    t.componente_comercializacion_cop_kwh = 80.0 * 1000
+    t.precio_exc2_cop_kwh = 350.0 * 1000
+    t.precio_mc_cop_kwh = 300.0 * 1000
     return cfg
 
 

@@ -21,12 +21,25 @@ def _c() -> pd.Series:
     return pd.Series(1.0, index=INDICE)  # 1 kWh/h plano
 
 
+# Valores fijos de las cuentas a mano; no dependen de lo que diga el YAML de ejemplo.
+TARIFA = {
+    "cu_cop_kwh": 900.0,
+    "componente_comercializacion_cop_kwh": 80.0,
+    "g_cop_kwh": 330.0,
+    "precio_exc2_cop_kwh": 350.0,
+    "valoracion_exc2": "precio_bolsa",
+}
+SISTEMA_FV = {"capex_cop_wp": 3200.0}
+BATERIA = {"capex_cop_kwh": 1_800_000.0}
+
+
 def _cfg(sistema_fv=None, bateria=None, ubicacion=None):
     base = cargar_config(EJEMPLO)
     return base.model_copy(
         update={
-            "sistema_fv": base.sistema_fv.model_copy(update=sistema_fv or {}),
-            "bateria": base.bateria.model_copy(update=bateria or {}),
+            "tarifa": base.tarifa.model_copy(update=TARIFA),
+            "sistema_fv": base.sistema_fv.model_copy(update={**SISTEMA_FV, **(sistema_fv or {})}),
+            "bateria": base.bateria.model_copy(update={**BATERIA, **(bateria or {})}),
             "ubicacion": base.ubicacion.model_copy(update=ubicacion or {}),
         }
     )

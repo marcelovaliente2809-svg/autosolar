@@ -4,7 +4,7 @@
 # (factura del cliente, tarifa vigente del operador de red, cotizaciones).
 
 empresa:
-  nombre: "Planta ejemplo 1 turno"
+  nombre: "Planta ilustrativa · Medellín"
   declara_renta: true              # habilita los incentivos de la Ley 1715 en el flujo de caja
 
 ubicacion:
@@ -19,18 +19,18 @@ consumo:
   jornada: "1_turno"               # "1_turno", "2_turnos", "continua"
 
 tarifa:
-  operador_red: "EPM"
-  nivel_tension: 2
-  cu_cop_kwh: 900.0                # EJEMPLO: costo unitario CU vigente (tarifa EPM)
-  componente_comercializacion_cop_kwh: 80.0   # EJEMPLO: componente C del CU
-  g_cop_kwh: 330.0                 # EJEMPLO: componente G (generación) del CU
+  operador_red: "EPM"              # Fuente: EPM, tarifas enero 2026, propiedad EPM
+  nivel_tension: 1                 # Fuente: EPM, tarifas enero 2026, nivel 1 propiedad EPM
+  cu_cop_kwh: 859.19               # Fuente: EPM, tarifas enero 2026, nivel 1 propiedad EPM (CU)
+  componente_comercializacion_cop_kwh: 113.66  # Fuente: EPM, tarifas enero 2026, nivel 1 propiedad EPM (C)
+  g_cop_kwh: 295.62                # Fuente: EPM, tarifas enero 2026, nivel 1 propiedad EPM (G)
   escalamiento_anual: 0.04         # EJEMPLO: crecimiento real/nominal de la tarifa
   valoracion_exc2: "precio_bolsa"  # "precio_bolsa" o "mc" (escenario CREG 101 072/087 de 2025)
   precio_exc2_cop_kwh: 350.0       # EJEMPLO: promedio de bolsa o Mc según el escenario
   precio_mc_cop_kwh: 300.0         # EJEMPLO: Mc, valoración de Exc2 en el escenario "mc"
 
 sistema_fv:
-  capex_cop_wp: 3200.0             # EJEMPLO: cotización instalada
+  capex_cop_wp: 3450.0             # Fuente: DYC Ingenieros 2026, 3.300–3.600 COP/Wp instalado (150–500 kWp)
   opex_pct_capex: 0.01             # O&M anual como fracción del CAPEX
   degradacion_anual: 0.005
   perdidas_sistema: 0.14           # pérdidas tipo PVWatts
@@ -40,7 +40,7 @@ sistema_fv:
   m2_por_kwp: 5.5                  # EJEMPLO: m² de techo por kWp (paneles + pasillos)
 
 bateria:
-  capex_cop_kwh: 1800000.0         # EJEMPLO
+  capex_cop_kwh: 1400000.0         # Fuente: Solartodo 2026, 290–450 USD/kWh BESS C&I Latinoamérica
   eficiencia_ciclo: 0.90
   dod: 0.90                        # profundidad de descarga utilizable
   c_rate: 0.5                      # potencia máx = c_rate * capacidad

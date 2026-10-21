@@ -161,7 +161,7 @@ def test_evaluar_valida_limites(cliente):
 
 
 def test_sensibilidad_tornado_escenarios_y_breakeven(cliente):
-    r = cliente.post("/api/sensibilidad", json=_cfg_dict())
+    r = cliente.post("/api/sensibilidad", json=_cfg_dict(**{"bateria.capex_cop_kwh": 1_800_000}))
     assert r.status_code == 200
     d = r.json()
     assert [f["variable"] for f in d["tornado"]].count("cu") == 1
